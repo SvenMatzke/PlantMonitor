@@ -1,7 +1,7 @@
 import socket
+# TODO function to construct package and also buffer calculations
 
-
-def http_get(url):
+def get(url):
     """
 
     """
@@ -18,3 +18,6 @@ def http_get(url):
             break
     s.close()
     return data
+
+def post(url, body):
+    raise

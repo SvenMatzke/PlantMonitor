@@ -6,7 +6,8 @@ After we created these plantsensors we will create an little sanic or flask appl
 # ESP setup for this is:
 # The Hardware:
   - adafruit breakout esp8266
-
+  - dht22
+  - TODO Soil moisture sensor hat als output 3-3.3 v den müsste ich auf max 1 v runterbrechen 
 # First step
 Install micropython on your esp8266 (instructions in the micropython link below)
 
