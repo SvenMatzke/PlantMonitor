@@ -8,7 +8,7 @@ http://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/powerctrl.html
 """
 # This file is executed on every boot (including wake-boot from deepsleep)
 import gc
-import webrepl
+import webrepl  #TODO webrepl rausnehmen wenn stable
 import wlan
 import settings
 webrepl.start()

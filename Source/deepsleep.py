@@ -1,7 +1,7 @@
 import machine
 
 
-def set_and_put_to_deepsleep(time_in_s):
+def set_awake_time_and_put_to_deepsleep(time_in_s):
     """
     Puts your device to deepsleep for a given time.
     Hardware note:

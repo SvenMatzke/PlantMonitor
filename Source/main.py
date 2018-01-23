@@ -11,19 +11,13 @@ from sensor.temperature_humidity import get_temperature_and_humidity
 import http
 import json
 import time
-from deepsleep import set_and_put_to_deepsleep
-
-# pip install pico web as dependency oder nur uaio
-# from here we need a little async magic to listen to the outside world and still maintaining timeouts
-# i want an async aio webinterface because
-# do i want that it would be cool but naaa
+from deepsleep import set_awake_time_and_put_to_deepsleep
 
 # get config data
-
 loaded_settings = settings.get_settings()
 
-# TODO config modularised
-def senor_data():
+
+def senor_data():  # TODO
     """
 
     :rtype: dict
@@ -34,10 +28,12 @@ def senor_data():
 
     return data
 
-# 1 .
-restful_online_time = 10  # TODO das müsste von config
 
-if wlan.is_connected_to_network():
+# if anything fails we are ready to set up
+restful_online_time = loaded_settings.get('awake_time_for_config', 300)
+keep_alive_time = restful_online_time
+
+if wlan.sta_if.active():
     # wenn connected try to get new config if this fails we set restful_online_time
     # => this will result in more energy consumption, but else you can config this device
     request_url = loaded_settings.get("request_url")
@@ -48,12 +44,25 @@ if wlan.is_connected_to_network():
             new_config=new_config
         )
         http.post(request_url, json.dumps(senor_data()))
-    except:
-        restful_online_time = 120 #TODO
+        keep_alive_time = loaded_settings.get('keep_alive_time_s')
+        restful_online_time = loaded_settings.get('max_awake_time_s')
+    except Exception as e:
+        # data was not send so we will need some config changes
+        restful_online_time = loaded_settings.get('awake_time_for_config', 300)
 
-print(senor_data()) #TODO cleanup
 
 #  start restful config server for a given time
+
+
+# pip install pico web as dependency oder nur uaio
+# from here we need a little async magic to listen to the outside world and still maintaining timeouts
+# i want an async aio webinterface because
+# do i want that it would be cool but naaa
+
+
+
+
+
 
 #TODO da brauch ich noch paar sachen
 import socket
