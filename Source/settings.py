@@ -23,7 +23,7 @@ def get_settings():
     """
     :rtype: dict
     """
-    if not os.path.exists(_settings_file):
+    if _settings_file not in os.listdir():
         return _default_config
     file_ptr = open(_settings_file, "r")
     try:
