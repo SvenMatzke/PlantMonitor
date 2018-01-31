@@ -27,9 +27,9 @@ def get_temperature_and_humidity(pin_id):
     return ("temperature", d.temperature()), ("humidity", d.humidity())
 
 
-def get_light_measure(scl_pin, sda_pin, address=39):
+def get_light_measure(scl_pin, sda_pin, address=0x39):
     scl = machine.Pin(scl_pin)
     sda = machine.Pin(sda_pin)
-    i2c = machine.I2C(address, scl=scl, sda=sda)
-    light_sensor = tsl2561.TSL2561(i2c)
+    i2c = machine.I2C(scl=scl, sda=sda)
+    light_sensor = tsl2561.TSL2561(i2c, address=address)
     return (("light", light_sensor.read()),)

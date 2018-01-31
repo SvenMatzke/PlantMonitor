@@ -1,4 +1,2 @@
 adafruit-ampy
 esptool
-picoweb
-pyb

@@ -11,7 +11,6 @@ import gc
 import wlan
 import settings
 
-print("start repl")
 gc.collect()
 
 print("deactivate wlan")

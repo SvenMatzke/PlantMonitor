@@ -97,10 +97,10 @@ def start_webserver():
         cl.close()
 
 '''
-http://docs.micropython.org/en/latest/esp8266/library/index.html
+http://docs.python.org/en/latest/esp8266/library/index.html
 '''
 
 '''
-http://docs.micropython.org/en/latest/esp8266/reference/speed_python.html
+http://docs.python.org/en/latest/esp8266/reference/speed_python.html
 '''
 # set_and_put_to_deepsleep(100) #TODO time from settings

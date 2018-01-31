@@ -1,5 +1,4 @@
 # PlantMonitor
-
 Whats the goal an esp sending soil moisture temperature, humidity and light to an source in your network.
 After we created these plantsensors we will create an little sanic or flask application to log or monitor these. 
 
@@ -7,6 +6,8 @@ After we created these plantsensors we will create an little sanic or flask appl
 # The Hardware:
   - adafruit breakout esp8266
   - dht22
+  - tsl2561
+  - soil moisture sensor mit LM393 chip
   - TODO Soil moisture sensor hat als output 3-3.3 v den müsste ich auf max 1 v runterbrechen 
 # First step
 Install micropython on your esp8266 (instructions in the micropython link below)
@@ -14,7 +15,8 @@ Install micropython on your esp8266 (instructions in the micropython link below)
 # Second step 
 Wire your sensors and clone or download this repository.
 In the src folder are python files you need to upload via ... 
-#
+
+#TODO installation description
 
 # TODO
 - the case for 3d printer
