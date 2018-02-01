@@ -23,7 +23,7 @@ In the src folder are python files you need to upload via ...
 - the wireing
 - powersupply on batteries
 
-# Infos
+# Infos and Greetings
 micropython:
 https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html
 

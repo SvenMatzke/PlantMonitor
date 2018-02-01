@@ -1,49 +1,49 @@
-import picoweb
-import uasyncio
+import uasyncio as asyncio
+from userv import App, json, text
 
-app = picoweb.WebApp("PlantMonitor")
-loop = uasyncio.get_event_loop()
-
-
-@app.route("/")
-def index(req, resp):
-    yield from picoweb.start_response(resp)
-
-    yield from resp.awrite("We need to serve a static index ")
+app = App()
+loop = asyncio.get_event_loop()
 
 
-@app.route("/data", method=['GET'])
-def get_data(req, resp):
-    yield from picoweb.start_response(resp)
-    yield from picoweb.jsonify(resp, {"data": "data"})
+async def index(request):
+    return await text("We need to serve a static index ")
 
 
-@app.route("/data", method=['POST'])
-def post_data(req, resp):
-    yield from picoweb.start_response(resp)
-    yield from picoweb.jsonify(resp, {"data": "postdata"})
+async def get_data(request):
+    return await json({"data": "data"})
 
 
-@app.route("/settings", method=['GET'])
-def get_settings(req, resp):
-    yield from picoweb.start_response(resp)
-    yield from picoweb.jsonify(resp, {"data": "damnget"})
+async def post_data(request):
+    return await json({"data": "postdata"})
 
 
-@app.route("/settings", method=['POST'])
-def post_settings(req, resp):
-    yield from picoweb.start_response(resp)
-    yield from picoweb.jsonify(resp, {"data": "damn"})
+async def get_settings(request):
+    return await json({"data": "damnget"})
 
 
-def shutdown_timeout():
-    yield uasyncio.sleep(60)
+async def post_settings(request):
+    return await json({"data": "damn"})
+
+
+# routes
+app.add_route("/", index, method='GET')
+app.add_route("/data", get_data, method='GET')
+app.add_route("/data", post_data, method='POST')
+app.add_route("/settings", get_settings, method='GET')
+app.add_route("/settings", post_settings, method='POST')
+
+
+async def shutdown_timeout():
+    print("shutdown_active")
+    await asyncio.sleep(60)
+    print("loop closes")
     loop.stop()
 
 
-import logging
+def run_server():
+    loop.call_soon(shutdown_timeout())
+    print("* Running on http://%s:%s/" % ('0.0.0.0', 80))
+    loop.call_soon(asyncio.start_server(app.run_handle, '0.0.0.0', 80))
 
-logging.basicConfig(level=logging.INFO)
-
-loop.create_task(shutdown_timeout())
-app.run(port=80)
+    loop.run_forever()
+    loop.close()

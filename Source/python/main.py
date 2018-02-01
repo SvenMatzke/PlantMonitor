@@ -65,36 +65,7 @@ if wlan.sta_if.active():
 
 
 #TODO da brauch ich noch paar sachen
-import socket
-html = """<!DOCTYPE html>
-<html>
-    <head><title>ESP8266 Pins</title></head>
-    <body>
-        <h1>hello from esp</h1>
-    </body>
-</html>
-"""
 
-def start_webserver():
-    addr = socket.getaddrinfo('0.0.0.0', 80)[0][-1]
-
-    s = socket.socket()
-    s.bind(addr)
-    s.listen(1)
-
-    print('listening on', addr)
-    start_time = time.time()
-    while time.time()-(start_time+restful_online_time) >= 0:
-        cl, addr = s.accept()
-        print('client connected from', addr)
-        cl_file = cl.makefile('rwb', 0)
-        while True:
-            line = cl_file.readline()
-            if not line or line == b'\r\n':
-                break
-        response = html
-        cl.send(response)
-        cl.close()
 
 '''
 http://docs.python.org/en/latest/esp8266/library/index.html
