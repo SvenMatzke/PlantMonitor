@@ -1,7 +1,8 @@
 """
+This will be the only file which may need to be customised
 http://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/dht.html
-https://docs.micropython.org/en/latest/pyboard/library/pyb.I2C.html
 https://github.com/adafruit/micropython-adafruit-tsl2561/blob/master/docs/tsl2561.rst
+
 """
 import dht
 import machine

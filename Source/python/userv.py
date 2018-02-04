@@ -1,6 +1,7 @@
 import uasyncio as asyncio
+import socket
 import ujson
-
+import os
 
 STATUS_CODES = {
     100: b'Continue',
@@ -49,7 +50,19 @@ STATUS_CODES = {
 HTTP_METHODS = ('GET', 'POST', 'PUT', 'HEAD', 'OPTIONS', 'PATCH', 'DELETE')
 
 
-async def _render_headers(*args):
+def get_mime_type(fname):
+    # Provide minimal detection of important file
+    # types to keep browsers happy
+    if fname.endswith(".html"):
+        return "text/html"
+    if fname.endswith(".css"):
+        return "text/css"
+    if fname.endswith(".png") or fname.endswith(".jpg"):
+        return "image"
+    return None
+
+
+def _render_headers(*args):
     """
 
     :param args:
@@ -61,7 +74,70 @@ async def _render_headers(*args):
     return content_str
 
 
+# requests
+def get(url):
+    """
+
+    """
+    _, _, host, path = url.split('/', 3)
+    addr = socket.getaddrinfo(host, 80)[0][-1]
+    s = socket.socket()
+    s.connect(addr)
+    headers = (
+        ("Host", host),
+        ("Accept", "%s;" % "application/json")
+    )
+    request_string = b"GET %s HTTP/1.1\r\n" \
+                     b"%s" \
+                     b"\r\n" % (
+                      path,
+                      _render_headers(*headers),
+                  )
+    s.send(request_string)
+    complete_stream = b""
+    while True:
+        part_stream = s.recv(100)
+        if part_stream:
+            complete_stream += part_stream
+        else:
+            break
+    s.close()
+    try:
+        # TODO this should be a reponse string which i need to parse again
+        return ujson.loads(complete_stream.decode())
+    except:
+        # failed do get data
+        return None
+
+def post(url, body):
+    raise
+
 # Response part
+def _response_header(status=200, content_type="text/html", content_length=None, headers=None):
+    """
+    :type status: int
+    :type content_type: str
+    :type headers: list
+    :return: binary
+    """
+
+    if headers is None:
+        headers = list()
+    else:
+        headers = list(headers)
+    headers.append(("Content-Type", "%s; utf-8" % content_type))
+    if content_length is not None:
+        headers.append(("Content-Length", str(content_length)))
+    html_string = b"HTTP/1.1 %i %s\r\n" \
+                  b"%s" \
+                  b"\r\n" % (
+                      status,
+                      STATUS_CODES.get(status, b"NA"),
+                      _render_headers(*headers),
+                  )
+    return html_string
+
+
 async def text(data, status=200, content_type="text/html", headers=None):
     """
     :type data: str
@@ -76,13 +152,14 @@ async def text(data, status=200, content_type="text/html", headers=None):
         headers = list(headers)
     headers.append(("Content-Type", "%s; utf-8" % content_type))
     headers.append(("Content-Length", str(len(data))))
-    html_string = b"HTTP/1.1 %i %s\r\n" \
-                  b"%s" \
-                  b"\r\n" \
+    html_string = b"%s" \
                   b"%s\r\n" % (
-                      status,
-                      STATUS_CODES.get(status, b"NA"),
-                      await _render_headers(*headers),
+                      _response_header(
+                          status=status,
+                          content_type=content_type,
+                          content_length=len(data),
+                          headers=headers
+                      ),
                       data
                   )
     return html_string
@@ -174,7 +251,7 @@ class App:
             route_with_slash = route
             route_without_slash = route[:-1]
         else:
-            route_with_slash = route+"/"
+            route_with_slash = route + "/"
             route_without_slash = route
 
         route_method_dict = self._routes.get(route_with_slash, self._routes.get(route_without_slash, None))
@@ -186,11 +263,49 @@ class App:
     async def run_handle(self, reader, writer):
         complete_request = await reader.read()
         parsed_request = await parse_request(complete_request.decode())
-        callback = await self._get_callback(route=parsed_request.get('route'), method=parsed_request.get('method'))
-        if callback in [404, 405]:
-            await text("Requested Route or method is not available", status=callback)
-        response = await callback(parsed_request)
-        await writer.awrite(
-            response
-        )
+        route = parsed_request.get('route')
+        if route.startswith('/static'):
+            fname = route.split("/")[-1]
+            if fname not in os.listdir():
+                await writer.awrite(
+                    await text(
+                        "File %s is not available " % fname,
+                        status=404
+                    )
+                )
+            else:
+                mime_type = get_mime_type(fname)
+                if mime_type is None:
+                    await writer.awrite(
+                        await text(
+                            "",
+                            status=415,
+                        )
+                    )
+                else:
+                    # serve static file
+                    await  writer.awrite(
+                        _response_header(
+                            status=200,
+                            content_type=mime_type,
+                            content_length=os.stat(fname)[0]
+                        )
+                    )
+                    file_ptr = open(fname)
+                    buf = bytearray(64)
+                    while True:
+                        l = file_ptr.readinto(buf)
+                        if not l:
+                            break
+                        await writer.awrite(buf, 0, l)
+                    file_ptr.close()
+
+        else:
+            callback = await self._get_callback(route=route, method=parsed_request.get('method'))
+            if callback in [404, 405]:
+                await text("Requested Route or method is not available", status=callback)
+            response = await callback(parsed_request)
+            await writer.awrite(
+                response
+            )
         await writer.aclose()
