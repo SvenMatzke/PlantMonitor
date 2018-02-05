@@ -18,7 +18,7 @@ wlan.ap_if.active(False)
 wlan.sta_if.active(False)
 
 config_data = settings.get_settings()
-wlan_config = config_data.get('wlan')
+wlan_config = config_data.get('wlan', {})
 
 print("connect existing network")
 is_connected = wlan.connect_to_existing_network(

@@ -75,24 +75,37 @@ def _render_headers(*args):
 
 
 # requests
-def get(url):
+def request(url, method="GET", body=None):
     """
-
+    body has to be a seralized json string
+    :type body: str
+    :return: returns parsed response
+    :rtype: dict
     """
     _, _, host, path = url.split('/', 3)
     addr = socket.getaddrinfo(host, 80)[0][-1]
     s = socket.socket()
     s.connect(addr)
-    headers = (
+    headers = [
         ("Host", host),
         ("Accept", "%s;" % "application/json")
-    )
-    request_string = b"GET %s HTTP/1.1\r\n" \
+    ]
+    if body is not None:
+        headers.append(
+            ("Content-Type", "%s; utf-8" % "application/json")
+        )
+        headers.append(
+            ("Content-Length", str(len(body)))
+        )
+    request_string = b"%s %s HTTP/1.1\r\n" \
                      b"%s" \
-                     b"\r\n" % (
-                      path,
-                      _render_headers(*headers),
-                  )
+                     b"\r\n"\
+                     b"%s\r\n" % (
+                         method,
+                         path,
+                         _render_headers(*headers),
+                         "" if body is None else body.encode()
+                     )
     s.send(request_string)
     complete_stream = b""
     while True:
@@ -102,15 +115,39 @@ def get(url):
         else:
             break
     s.close()
-    try:
-        # TODO this should be a reponse string which i need to parse again
-        return ujson.loads(complete_stream.decode())
-    except:
-        # failed do get data
-        return None
+    parsed_reponse = _parse_response(complete_stream.decode())
+    if "application/json" in parsed_reponse['header'].get('Content-Type', ""):
+        parsed_reponse['body'] = ujson.loads(parsed_reponse.get("body", ""))
+    return parsed_reponse
 
-def post(url, body):
-    raise
+
+# Request parser
+def _parse_header(list_of_header_str):
+    header = dict()
+    for header_str in list_of_header_str:
+        key, value = header_str.split(":")
+        header[key] = value
+    return header
+
+
+def parse_request(request_string):
+    """
+    Parses a request and splits them into an dict to return
+    :param request_string: str
+    :return: dict
+    """
+    heading, data = request_string.split("\r\n\r\n")
+    header = heading.split("\r\n")
+    data.rstrip("\r\n")
+    method, route, http_version = header[0].split(" ")
+    return dict(
+        method=method,
+        route=route,
+        http_version=http_version,
+        header=_parse_header(header[1:]),
+        body=data.rstrip("\r\n")
+    )
+
 
 # Response part
 def _response_header(status=200, content_type="text/html", content_length=None, headers=None):
@@ -186,48 +223,19 @@ async def json(data, status=200, headers=None):
     )
 
 
-# Request part
-def unquote_plus(s):
-    # TODO: optimize
-    s = s.replace("+", " ")
-    arr = s.split("%")
-    arr2 = [chr(int(x[:2], 16)) + x[2:] for x in arr[1:]]
-    return arr[0] + "".join(arr2)
-
-
-def parse_qs(s):
-    res = {}
-    if s:
-        pairs = s.split("&")
-        for p in pairs:
-            vals = [unquote_plus(x) for x in p.split("=", 1)]
-            if len(vals) == 1:
-                vals.append(True)
-            if vals[0] in res:
-                res[vals[0]].append(vals[1])
-            else:
-                res[vals[0]] = [vals[1]]
-    return res
-
-
-async def parse_request(request_string):
-    """
-    Parses a request and splits them into an dict to return
-    :param request_string: str
-    :return: dict
-    """
-    heading, data = request_string.split("\r\n\r\n")
+# reponse parser
+def _parse_response(reponse_str):
+    heading, data = reponse_str.split("\r\n\r\n")
     header = heading.split("\r\n")
     data.rstrip("\r\n")
-    method, route, http_version = header[0].split(" ")
+    http_version, status_code, status_translation= header[0].split(" ")
     return dict(
-        method=method,
-        route=route,
+        status_code=status_code,
+        status_translation=status_translation,
         http_version=http_version,
-        # header=parse_qs(header[1:]), # TODO
+        header=_parse_header(header[1:]),
         body=data.rstrip("\r\n")
     )
-
 
 class App:
 
@@ -262,7 +270,7 @@ class App:
 
     async def run_handle(self, reader, writer):
         complete_request = await reader.read()
-        parsed_request = await parse_request(complete_request.decode())
+        parsed_request = parse_request(complete_request.decode())
         route = parsed_request.get('route')
         if route.startswith('/static'):
             fname = route.split("/")[-1]
