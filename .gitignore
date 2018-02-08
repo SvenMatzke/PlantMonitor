@@ -99,3 +99,5 @@ ENV/
 
 # mypy
 .mypy_cache/
+/Source/static_index/node_modules/*
+.idea/
