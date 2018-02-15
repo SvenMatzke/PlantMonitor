@@ -29,6 +29,3 @@ https://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/intro.html
 
 uploading files:
 https://learn.adafruit.com/micropython-basics-load-files-and-run-code/install-ampy#upgrade-ampy
-
-pico web
-https://techtutorialsx.com/2017/09/01/esp32-micropython-http-webserver-with-picoweb/

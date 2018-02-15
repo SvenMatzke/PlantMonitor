@@ -6,22 +6,24 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 class Navbar extends Component {
   render() {
     return(
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
-          <Link class="navbar-brand" to="/">Plantmonitor</Link>
-          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
+        <nav className="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+          <Link className="navbar-brand" to="/">Plantmonitor</Link>
+          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#Plantnavbar" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
           </button>
 
-          <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-            <ul class="navbar-nav mr-auto">
-              <li class="nav-item">
-                <Link class="nav-link" to="#">Home </Link>
+          <div className="collapse navbar-collapse" id="Plantnavbar">
+            <ul className="navbar-nav mr-auto">
+              <li className="nav-item">
+                <Link className="nav-link" to="/">Home </Link>
               </li>
-              <li class="nav-item">
-                <Link class="nav-link" to="/CurrentData">Current Data</Link>
+              <li className="nav-item">
+                <Link className="nav-link" to="/CurrentData">Current Data</Link>
               </li>
-
             </ul>
+            <span className="navbar-text">
+              <Link className="navbar-brand" to="/Settings">Settings</Link>
+            </span>
           </div>
         </nav>
       )
@@ -36,10 +38,10 @@ class App extends Component {
         <div>
           <Navbar></Navbar>
 
-          <main role="main" class="container" role="main" style={{'padding-top': 5+ 'rem'}}>
+          <main role="main" className="container" role="main" style={{'paddingTop': 5+ 'rem'}}>
             <div>
               <Switch>
-                <Route exact path="/" component={Home}/>
+                <Route exact path="/" component={CurrentData}/>
                 <Route path="/CurrentData" component={CurrentData}/>
                 <Route path="/Settings" component={Settings}/>
               </Switch>

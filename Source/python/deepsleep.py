@@ -2,13 +2,6 @@ import machine
 
 
 def set_awake_time_and_put_to_deepsleep(time_in_s):
-    """
-    Puts your device to deepsleep for a given time.
-    Hardware note:
-    connect gpio16 to reset to be able to deep sleep
-
-    :param time_in_s: time to be in deepsleep
-    """
     # configure RTC.ALARM0 to be able to wake the device
     rtc = machine.RTC()
     rtc.irq(trigger=rtc.ALARM0, wake=machine.DEEPSLEEP)

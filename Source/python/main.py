@@ -1,23 +1,16 @@
-"""
-
-#uploading files
-https://learn.adafruit.com/micropython-basics-load-files-and-run-code/boot-scripts
-
-"""
-import wlan
-import settings
-from sensor import senor_data
-import uasyncio as asyncio
-from server import plant_app, last_request_time
-from userv import request
-import ujson as json
-from deepsleep import set_awake_time_and_put_to_deepsleep
 import gc
-import time
+gc.collect()
+# import wlan
+# import settings
+# import sensor
+# import requests
+import ujson
 
+#TODO sync rtc
+# ntptime
 # get config data
+print(gc.mem_free())
 loaded_settings = settings.get_settings()
-
 # if anything fails we are ready to set up
 restful_online_time = loaded_settings.get('awake_time_for_config', 300)
 keep_alive_time = restful_online_time
@@ -29,7 +22,7 @@ if wlan.sta_if.active():
     if request_url is not None:
         try:
             # get new settings  # TODO frage ob das drin bleibt
-            parsed_reponse = request(request_url)
+            parsed_reponse = requests.request(request_url)
             if int(parsed_reponse.get('status_code', 500)) >= 300:
                 raise ConnectionError("Response was incorrect")
             elif "application/json" not in parsed_reponse['header'].get('Content-Type', ""):
@@ -43,10 +36,12 @@ if wlan.sta_if.active():
             )
 
             # send plant_monitor data
-            parsed_reponse = request(
+            sensor_data = sensor.sensor_data()
+            sensor_data.update(loaded_settings.get('added_infos_to_sensor_data', {}))
+            parsed_reponse = requests.request(
                 request_url,
                 method="POST",
-                body=json.dumps(senor_data(loaded_settings.get('added_infos_to_sensor_data', {})))
+                body=ujson.dumps(sensor_data)
             )
             if int(parsed_reponse.get('status_code', 500)) >= 300:
                 raise ConnectionError("Response was incorrect")
@@ -58,30 +53,37 @@ if wlan.sta_if.active():
             restful_online_time = loaded_settings.get('awake_time_for_config', 300)
 
 # webserver will be started to listen
-loop = asyncio.get_event_loop()
+# Need to clean up some cache before its too low
+gc.collect()
+print(gc.mem_free())
+# import server
+# import deepsleep
+import uasyncio
+# import time
+
+
+loop = uasyncio.get_event_loop()
 
 accumulated_time = 0
-
 
 async def shutdown_timeout():
     global accumulated_time
     print("shutdown_active")
-    while accumulated_time < restful_online_time and (time.time() - last_request_time) <= keep_alive_time:
-        await asyncio.sleep(keep_alive_time)
+    while accumulated_time < restful_online_time and (time.time() - server.last_request_time) <= keep_alive_time:
+        await uasyncio.sleep(keep_alive_time)
         accumulated_time += int(keep_alive_time)
     print("loop closes")
     loop.stop()
 
 
 # run server
-gc.collect()
+print(gc.mem_free())
 loop.call_soon(shutdown_timeout())
 print("* Running on http://%s:%s/" % ('0.0.0.0', 80))
-loop.call_soon(asyncio.start_server(plant_app.run_handle, '0.0.0.0', 80))
 
-loop.run_forever()
+loop.run_forever(uasyncio.start_server(server.plant_app.run_handle, '0.0.0.0', 80))
 loop.close()
 
-set_awake_time_and_put_to_deepsleep(
+deepsleep.set_awake_time_and_put_to_deepsleep(
     loaded_settings.get("deepsleep_s", 100)
 )

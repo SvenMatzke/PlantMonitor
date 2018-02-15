@@ -20,16 +20,13 @@ def connect_to_existing_network(essid, password):
     if not sta_if.isconnected():
         sta_if.active(False)
         print('Connection NOT establisched')
+        return False
     else:
         print('network config:', sta_if.ifconfig())
-    return sta_if.isconnected()
+    return True
 
 
 def create_an_network():
-    """
-
-    :return: connected WLAN class
-    """
     ap_if.active(True)
     essid = "MyPlantMonitor"
     password = "MyPlantMonitor"

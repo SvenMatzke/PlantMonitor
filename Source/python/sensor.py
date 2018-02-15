@@ -1,11 +1,6 @@
-"""
-This will be the only file which may need to be customised
-http://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/dht.html
-https://github.com/adafruit/micropython-adafruit-tsl2561/blob/master/docs/tsl2561.rst
-
-"""
 import dht
 import machine
+import time
 import tsl2561
 
 
@@ -15,6 +10,7 @@ def _get_soil_moisture(pin_id):
     :rtype: tuple(key, int)
     """
     adc = machine.ADC(pin_id)
+    # max wert ist der höchste und geringste solle
     return (("soil moisture", adc.read() / 1024),)
 
 
@@ -36,12 +32,11 @@ def _get_light_measure(scl_pin, sda_pin, address=0x39):
     return (("light", light_sensor.read()),)
 
 
-def senor_data(additional_data_from_settings):  # TODO
+def sensor_data():
     """
-    :type additional_data_from_settings: dict
     :rtype: dict
     """
-    data = additional_data_from_settings
+    data = dict(time=time.time())
     data.update(_get_soil_moisture(0))
     data.update(_get_temperature_and_humidity(2))
     data.update(_get_light_measure(5, 4))
