@@ -31,4 +31,4 @@ def create_an_network():
     essid = "MyPlantMonitor"
     password = "MyPlantMonitor"
     ap_if.config(essid=essid, password=password, authmode=4)
-    print('essid: %s, pw: %s' % (essid, password))
+    print('essid: ', essid, ', pw: ', password)
