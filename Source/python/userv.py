@@ -155,7 +155,7 @@ def json(writer, data, status=200, headers=None):
     )
 
 
-def static_file(writer, fname):
+def static_file(writer, fname, buffer):
     if fname not in os.listdir():
         writer.send(
             text(
@@ -176,9 +176,8 @@ def static_file(writer, fname):
             )
             return
         # serve static file
-        gc.collect()
         content_len = os.stat(fname)[6]
-        buffer_size = 1024  # buffersize needs to be variable maybe
+        buffer_size = len(buffer)
         writer.send(
             _response_header(
                 status=200,
@@ -186,18 +185,17 @@ def static_file(writer, fname):
             )
         )
         file_ptr = open(fname, "rb")
-        buf = bytearray(buffer_size)
         for _ in range(0, content_len // buffer_size):
-            file_ptr.readinto(buf)
-            writer.send(buf)
+            file_ptr.readinto(buffer)
+            writer.send(buffer)
 
-        gc.collect()
-        buf = bytearray(content_len % buffer_size)
-        file_ptr.readinto(buf)
-        writer.send(buf)
+        last_len = content_len % buffer_size
+        file_ptr.readinto(buffer)
+        writer.send(buffer[:last_len])
 
         file_ptr.close()
         gc.collect()
+
 
 class App:
 
@@ -250,7 +248,7 @@ class App:
         s = socket.socket()
         gc.disable()
         s.bind(addr)
-        s.listen(2)
+        s.listen(1)
         timeout = lambda: True
         if timeout_callback is not None:
             timeout = timeout_callback
@@ -258,7 +256,7 @@ class App:
             while timeout():
                 try:
                     gc.collect()
-                    s.settimeout(20)
+                    s.settimeout(60)
                     writer, client_addr = s.accept()
 
                     print('client connected from: ', client_addr)
@@ -287,10 +285,7 @@ class App:
         # routes
         callback = self._get_callback(route=route, method=parsed_request.get('method'))
         gc.collect()
-        print("callback: ", callback)
         if not callable(callback):
             text(writer, "Requested Route or method is not available", status=404)
 
         callback(writer, parsed_request)
-        print("in the end")
-        print(gc.mem_free())
