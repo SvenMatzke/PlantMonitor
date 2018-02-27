@@ -23,3 +23,8 @@ http://docs.micropython.org/en/latest/esp8266/esp8266/tutorial/dht.html
 https://github.com/adafruit/micropython-adafruit-tsl2561/blob/master/docs/tsl2561.rst
 
 """
+
+
+we need to but userv.py and the tsl2561 package into the build of the esp firmware because we dont have the memory to do it on the fly
+
+https://pypi.python.org/pypi/tsl2561/3.3

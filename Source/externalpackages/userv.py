@@ -178,21 +178,22 @@ def static_file(writer, fname, buffer):
         # serve static file
         content_len = os.stat(fname)[6]
         buffer_size = len(buffer)
-        writer.send(
+        writer.write(
             _response_header(
                 status=200,
-                content_type=mime_type
+                content_type=mime_type,
+                content_length=content_len
             )
         )
         file_ptr = open(fname, "rb")
-        for _ in range(0, content_len // buffer_size):
+        for _ in range(0, (content_len // buffer_size)):
             file_ptr.readinto(buffer)
-            writer.send(buffer)
+            writer.write(buffer)
+            gc.collect()
 
-        last_len = content_len % buffer_size
-        file_ptr.readinto(buffer)
-        writer.send(buffer[:last_len])
-
+        readed_len = file_ptr.readinto(buffer)
+        writer.write(buffer[:readed_len])
+        writer.write(b'\r\n')
         file_ptr.close()
         gc.collect()
 

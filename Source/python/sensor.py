@@ -1,7 +1,7 @@
 import dht
 import machine
 import time
-import tsl2561
+from Source.externalpackages import tsl2561
 
 _adc = machine.ADC(0)
 _dht = dht.DHT22(machine.Pin(2))
