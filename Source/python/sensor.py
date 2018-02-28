@@ -1,7 +1,7 @@
 import dht
 import machine
 import time
-from Source.externalpackages import tsl2561
+import tsl2561
 
 _adc = machine.ADC(0)
 _dht = dht.DHT22(machine.Pin(2))
@@ -16,6 +16,7 @@ def _get_soil_moisture():
     :return: returns the soil_moisture in percentage
     :rtype: tuple(key, int)
     """
+    #TODO
     # max wert ist der höchste und geringste solle
     return (("soil moisture", _adc.read() / 1024),)
 
