@@ -89,6 +89,20 @@ def _get_data(writer, request):
     return userv.json(writer, sens_data)
 
 
+def _history_data(writer, request):
+    global last_request_time
+    last_request_time = time.time()
+    # TODO
+    return
+
+
+def _sensor_configure(writer, request):
+    global last_request_time
+    last_request_time = time.time()
+    configuration_data = sensor.configure_sensor()
+    return userv.json(writer, configuration_data)
+
+
 def _get_settings(writer, request):
     global last_request_time
     last_request_time = time.time()
@@ -110,9 +124,10 @@ def _post_settings(writer, request):
 plant_app.add_route("/", _index, method='GET')
 plant_app.add_route("/app.bundle.js", _static_js, method='GET')
 plant_app.add_route("/styles.bundle.css", _static_css, method='GET')
-plant_app.add_route("/data", _get_data, method='GET')
-plant_app.add_route("/settings", _get_settings, method='GET')
-plant_app.add_route("/settings", _post_settings, method='POST')
+plant_app.add_route("/rest/data", _get_data, method='GET')
+plant_app.add_route("/rest/configure", _get_data, method='POST')
+plant_app.add_route("/rest/settings", _get_settings, method='GET')
+plant_app.add_route("/rest/settings", _post_settings, method='POST')
 
 # run server
 plant_app.run_server(

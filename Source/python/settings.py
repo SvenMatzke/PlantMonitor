@@ -28,7 +28,21 @@ def get_settings():
             )
         file_ptr = open(_settings_file, "r")
         try:
-            settings = ujson.load(file_ptr)
+            settings = ujson.loads(file_ptr.read())
+        except ValueError:
+            os.remove(_settings_file)
+            return dict(
+                wlan=dict(
+                    ssid=None,
+                    password=None,
+                ),
+                deepsleep_s=600,  # 10 minutes
+                keep_alive_time_s=30,
+                max_awake_time_s=120,  # 120 seconds after sending first request data.
+                awake_time_for_config=180,  # 3 minutes
+                request_url=None,
+                added_infos_to_sensor_data=dict(),  # this dict adds additional information for the posted sensor_data
+            )
         finally:
             file_ptr.close()
         _loaded_config = settings
@@ -83,7 +97,7 @@ def save_settings(old_config, new_config):
     # save config
     file_ptr = open(_settings_file, "w")
     try:
-        ujson.dump(file_ptr, old_config)
+        file_ptr.write(ujson.dumps(old_config))
     finally:
         file_ptr.close()
     gc.collect()

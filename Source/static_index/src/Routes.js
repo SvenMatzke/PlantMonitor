@@ -10,7 +10,7 @@ class CurrentData extends Component {
   }
 
   componentDidMount(){
-    axios.get('/data')
+    axios.get('/rest/data')
       .then((response) => {
          this.setState(response.data) //Change
       }).catch((err) => {
@@ -61,7 +61,7 @@ class Settings extends Component {
   }
 
   componentDidMount(){
-    axios.get('/settings')
+    axios.get('/rest/settings')
       .then((response) => {
          this.setState(response.data) //Change
       }).catch((err) => {
@@ -70,7 +70,7 @@ class Settings extends Component {
   }
 
   submitNewSettings(event){
-    axios.post('/settings', this.state)
+    axios.post('/rest/settings', this.state)
     event.preventDefault();
   }
 
