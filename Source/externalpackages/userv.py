@@ -288,5 +288,5 @@ class App:
         gc.collect()
         if not callable(callback):
             text(writer, "Requested Route or method is not available", status=404)
-
-        callback(writer, parsed_request)
+        else:
+            callback(writer, parsed_request)
