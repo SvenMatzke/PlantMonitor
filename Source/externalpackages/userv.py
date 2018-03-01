@@ -118,8 +118,6 @@ def text(writer, data, status=200, content_type="text/html", headers=None):
         headers = list()
     else:
         headers = list(headers)
-    headers.append(("Content-Type", "%s; utf-8" % content_type))
-    headers.append(("Content-Length", str(len(data))))
     html_string = b"%s" \
                   b"%s\r\n" % (
                       _response_header(
@@ -131,12 +129,11 @@ def text(writer, data, status=200, content_type="text/html", headers=None):
                       data
                   )
 
-    writer.send(html_string)
+    writer.write(html_string)
 
 
 def json(writer, data, status=200, headers=None):
     content_type = "application/json"
-    data_string = ""
     try:
         data_string = ujson.dumps(data)
     except:
@@ -146,6 +143,7 @@ def json(writer, data, status=200, headers=None):
             status=422,
             headers=headers
         )
+        return
     text(
         writer,
         data_string,
@@ -157,22 +155,18 @@ def json(writer, data, status=200, headers=None):
 
 def static_file(writer, fname, buffer):
     if fname not in os.listdir():
-        writer.send(
-            text(
-                writer,
-                "",
-                status=404
-            )
+        text(
+            writer,
+            "",
+            status=404
         )
     else:
         mime_type = _get_mime_type(fname)
         if mime_type is None:
-            writer.send(
-                text(
-                    writer,
-                    "",
-                    status=415,
-                )
+            text(
+                writer,
+                "",
+                status=415,
             )
             return
         # serve static file
