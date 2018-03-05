@@ -12,6 +12,15 @@ _sda = machine.Pin(4)
 _i2c = machine.I2C(scl=_scl, sda=_sda)
 _light_sensor = tsl2561.TSL2561(_i2c, address=0x39)
 _config_file = "sensor_config.json"
+history_sensor_data_file = "sensor_data_log.json"
+
+
+def _save_sensor_data(sensor_data):
+    file_ptr = open(history_sensor_data_file, "a")
+    bytes_written = file_ptr.write(ujson.dumps(sensor_data)+"\n")
+    end_of_stream = file_ptr.tell()
+    file_ptr.close()
+    # TODO need to cleanup data at some point
 
 
 def configure_sensor():
@@ -37,7 +46,6 @@ def _load_configuration():
         file_ptr = open(_config_file, "r")
         try:
             read_file =file_ptr.read()
-            print(read_file)
             loaded_config = ujson.loads(read_file)
         except ValueError:
             os.remove(_config_file)
@@ -83,4 +91,5 @@ def sensor_data():
     data.update(_get_soil_moisture())
     data.update(_get_temperature_and_humidity())
     data.update(_get_light_measure())
+    _save_sensor_data(data)
     return data

@@ -1,5 +1,7 @@
 import gc
 
+import os
+
 gc.collect()
 
 buf = bytearray(2048)
@@ -28,11 +30,11 @@ if wlan.sta_if.isconnected():
     # wenn connected try to get new config if this fails we set restful_online_time
     # => this will result in more energy consumption, but else you can config this device
     request_url = loaded_settings.get("request_url", None)
+    sensor_data = sensor.sensor_data()
+    sensor_data.update(loaded_settings.get('added_infos_to_sensor_data', {}))
     if request_url is not None:
         try:
             # send plant_monitor data
-            sensor_data = sensor.sensor_data()
-            sensor_data.update(loaded_settings.get('added_infos_to_sensor_data', {}))
             response = urequests.post(
                 request_url,
                 json=sensor_data
@@ -92,7 +94,30 @@ def _get_data(writer, request):
 def _history_data(writer, request):
     global last_request_time
     last_request_time = time.time()
-    # TODO
+
+    content_len = 0
+    if sensor.history_sensor_data_file not in os.listdir():
+        content_len = os.stat(sensor.history_sensor_data_file)[6]
+
+    writer.write(
+        userv._response_header(
+            status=200,
+            content_type="application/json",
+            content_length=content_len+2
+        )
+    )
+    writer.write("[")
+    if content_len > 0:
+        file_ptr = open(sensor.history_sensor_data_file, "r")
+        while True:
+            read = file_ptr.readline().rstrip("\n")
+            writer.write(read)
+            gc.collect()
+            if read == "":
+                break
+        file_ptr.close()
+
+    writer.write("]")
     return
 
 
