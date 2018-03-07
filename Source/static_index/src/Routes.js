@@ -1,15 +1,30 @@
 import React, { Component } from 'react';
+import { bindActionCreators} from 'redux';
+import { connect } from 'react-redux';
 import axios from 'axios';
+var Immutable = require('immutable');
 
+const actions = {
+    updateSensorHistory: sensor_data_list => (
+      { type: 'SENSOR_DATA_HISTORY',
+        sensor_list: sensor_data_list}
+      ),
+    addSensorData: sensor_data => (
+      {
+        type: 'ADD_SENSOR_DATA',
+        data: sensor_data
+      }
+    ),
+    updateSettings: settings => (
+      {
+        type: 'UPDATE_SETTINGS',
+        data : settings
+      }
+    )
+};
 
 class CurrentData extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-    }
-  }
-
-  componentDidMount(){
+    componentDidMount(){
     axios.get('/rest/data')
       .then((response) => {
          this.setState(response.data) //Change
@@ -27,9 +42,10 @@ class CurrentData extends Component {
     )
   }
   render() {
-    let elements = Object.keys(this.state).map(
-      (element) => this.add_list_element(element, this.state[element])
-    )
+    let elements = "data"
+    // Object.keys(settings).map(
+    //   (element) => this.add_list_element(element, settings[element])
+    // )
     return(
       <div>
       <ul className="list-group">
@@ -41,79 +57,64 @@ class CurrentData extends Component {
 }
 
 
-class Settings extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      "wlan" : {
-         "ssid" : "",
-         "password" : ""
-      },
-      "deepsleep_s" : 600,
-      "keep_alive_time_s" : 30,
-      "max_awake_time_s" : 120,
-      "awake_time_for_config" : 180,
-      "request_url" : "",
-      "added_infos_to_sensor_data" : {}
-    }
-
-    this.submitNewSettings = this.submitNewSettings.bind(this);
-  }
+class SettingsComp extends Component {
 
   componentDidMount(){
     axios.get('/rest/settings')
       .then((response) => {
-         this.setState(response.data) //Change
+          this.acts.updateSettings(response.data)
       }).catch((err) => {
          // cant set anything
       });
   }
 
   submitNewSettings(event){
-    axios.post('/rest/settings', this.state)
+    const { settings, acts } = this.props;
+    axios.post('/rest/settings', settings)
     event.preventDefault();
   }
 
   render() {
+    const { settings, acts } = this.props;
     return(
       <form onSubmit={this.submitNewSettings}>
         <div className="form-row">
           <div className="form-group col-md-6">
              <label for="inputssid">SSID</label>
-             <input type="text" className="form-control" id="inputssid" placeholder="SSID" defaultValue={this.state.wlan.ssid}
-              onChange={event => this.state.wlan.ssid = event.target.value} />
+             <input type="text" className="form-control" id="inputssid" placeholder="SSID" value={settings.wlan.ssid}
+              />
            </div>
            <div className="form-group col-md-6">
              <label for="inputPassword">Password</label>
-             <input type="password" className="form-control" id="inputPassword" placeholder="Password" defaultValue={ this.state.wlan.password }
-              onChange={event => this.state.wlan.password = event.target.value} />
+             <input type="password" className="form-control" id="inputPassword" placeholder="Password" defaultValue={ settings.wlan.password }
+              onChange={event => settings.wlan.password = event.target.value} />
            </div>
         </div>
        <div className="form-group">
          <label for="inputRequestUrl">Requesturl (address to send current data on every wakeup)</label>
-         <input type="text" className="form-control" id="inputRequestUrl" placeholder="" defaultValue={ this.state.request_url }
-          onChange={event => this.state.request_url = event.target.value} />
+         <input type="text" className="form-control" id="inputRequestUrl" placeholder="" defaultValue={ settings.request_url }
+          onChange={event => settings.request_url = event.target.value} />
        </div>
        <div className="form-group">
          <label for="inputConfigTime">Time in seconds for the html interface to be only if Requesturl is not set or reachable</label>
-         <input type="text" className="form-control" id="inputConfigTime" placeholder="" defaultValue={ this.state.awake_time_for_config }
-          onChange={event => this.state.awake_time_for_config = event.target.value} />
+         <input type="text" className="form-control" id="inputConfigTime" placeholder="" defaultValue={ settings.awake_time_for_config }
+          onChange={event => settings.awake_time_for_config = event.target.value} />
        </div>
        <div className="form-group">
          <label for="inputDeepsleep">Time in seconds this plantmonitor will be in deepsleep</label>
-         <input type="text" className="form-control" id="inputDeepsleep" placeholder="" defaultValue={ this.state.deepsleep_s }
-          onChange={event => this.state.deepsleep_s = event.target.value} />
+         <input type="text" className="form-control" id="inputDeepsleep" placeholder="" defaultValue={ settings.deepsleep_s }
+          onChange={event => settings.deepsleep_s = event.target.value} />
        </div>
        <div className="form-row">
          <div className="form-group col-md-6">
             <label for="inputAwakeTime">max awake time in seconds</label>
-            <input type="text" className="form-control" id="inputAwakeTime" placeholder="" defaultValue={ this.state.max_awake_time_s }
-             onChange={event => this.state.max_awake_time_s = event.target.value} />
+            <input type="text" className="form-control" id="inputAwakeTime" placeholder="" defaultValue={ settings.max_awake_time_s }
+             onChange={event => settings.max_awake_time_s = event.target.value} />
           </div>
           <div className="form-group col-md-6">
             <label for="inputKeepAlive">keep alive time in seconds</label>
-            <input type="text" className="form-control" id="inputKeepAlive" placeholder="" defaultValue={ this.state.keep_alive_time_s }
-              onChange={event => this.state.keep_alive_time_s = event.target.value} />
+            <input type="text" className="form-control" id="inputKeepAlive" placeholder="" defaultValue={ settings.keep_alive_time_s }
+              onChange={event => settings.keep_alive_time_s = event.target.value} />
           </div>
        </div>
        <button type="submit" className="btn btn-primary">change</button>
@@ -122,4 +123,9 @@ class Settings extends Component {
   }
 }
 
-export {Home, CurrentData, Settings};
+const Settings = connect(
+  state => ({settings: state.settings }),
+  dispatch=> { acts: bindActionCreators(actions, dispatch) }
+)(SettingsComp)
+
+export {CurrentData, Settings};

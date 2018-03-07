@@ -1,5 +1,4 @@
 import gc
-
 import os
 
 gc.collect()
@@ -23,15 +22,16 @@ loaded_settings = settings.get_settings()
 restful_online_time = loaded_settings.get('awake_time_for_config', 300)
 keep_alive_time = restful_online_time
 
+# update time
 if wlan.sta_if.isconnected():
-    # update time
     ntptime.settime()
 
-    # wenn connected try to get new config if this fails we set restful_online_time
-    # => this will result in more energy consumption, but else you can config this device
+# with every start we gather sensor data at least once
+sensor_data = sensor.sensor_data()
+sensor_data.update(loaded_settings.get('added_infos_to_sensor_data', {}))
+
+if wlan.sta_if.isconnected():
     request_url = loaded_settings.get("request_url", None)
-    sensor_data = sensor.sensor_data()
-    sensor_data.update(loaded_settings.get('added_infos_to_sensor_data', {}))
     if request_url is not None:
         try:
             # send plant_monitor data
@@ -103,14 +103,17 @@ def _history_data(writer, request):
         userv._response_header(
             status=200,
             content_type="application/json",
-            content_length=content_len+2
+            content_length=content_len + 2 - 1  # +2 braces -1 tailoring \n
         )
     )
     writer.write("[")
     if content_len > 0:
         file_ptr = open(sensor.history_sensor_data_file, "r")
+        read = ""
         while True:
-            read = file_ptr.readline().rstrip("\n")
+            if read != "":
+                writer.write(",")
+            read = file_ptr.readline().replace("\n", "")
             writer.write(read)
             gc.collect()
             if read == "":
@@ -150,6 +153,7 @@ plant_app.add_route("/", _index, method='GET')
 plant_app.add_route("/app.bundle.js", _static_js, method='GET')
 plant_app.add_route("/styles.bundle.css", _static_css, method='GET')
 plant_app.add_route("/rest/data", _get_data, method='GET')
+plant_app.add_route("/rest/sensor_history", _get_data, method='GET')
 plant_app.add_route("/rest/configure", _get_data, method='POST')
 plant_app.add_route("/rest/settings", _get_settings, method='GET')
 plant_app.add_route("/rest/settings", _post_settings, method='POST')

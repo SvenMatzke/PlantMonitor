@@ -5,14 +5,23 @@ import tsl2561
 import ujson
 import os
 
+_power_adc = machine.Pin(14, machine.Pin.OUT)
 _adc = machine.ADC(0)
-_dht = dht.DHT22(machine.Pin(2))
+_power_dht = machine.Pin(13, machine.Pin.OUT)
+_dht = dht.DHT22(machine.Pin(12))
+_power_tsl = machine.Pin(2, machine.Pin.OUT)
+_power_tsl.value(1)
 _scl = machine.Pin(5)
 _sda = machine.Pin(4)
 _i2c = machine.I2C(scl=_scl, sda=_sda)
 _light_sensor = tsl2561.TSL2561(_i2c, address=0x39)
 _config_file = "sensor_config.json"
 history_sensor_data_file = "sensor_data_log.json"
+
+# all power off
+_power_adc.value(0)
+_power_dht.value(0)
+_power_tsl.value(0)
 
 
 def _save_sensor_data(sensor_data):
@@ -28,6 +37,8 @@ def configure_sensor():
     saves max sensor values for configuration
     :return: dict
     """
+    _power_adc.value(1)
+    time.sleep(0.5)
     try:
         config = {"adc_max": _adc.read()}
     except:
@@ -38,6 +49,7 @@ def configure_sensor():
         file_ptr.write(ujson.dumps(config))
     finally:
         file_ptr.close()
+    _power_adc.value(0)
     return config
 
 
@@ -87,9 +99,18 @@ def sensor_data():
     """
     :rtype: dict
     """
-    data = dict(time=time.time())
-    data.update(_get_soil_moisture())
-    data.update(_get_temperature_and_humidity())
-    data.update(_get_light_measure())
+    try:
+        _power_adc.value(1)
+        _power_dht.value(1)
+        _power_tsl.value(1)
+        time.sleep(0.5)  # dht mag es nicht sofort abgerufen zu werden
+        data = dict(time=time.time())
+        data.update(_get_soil_moisture())
+        data.update(_get_light_measure())
+        data.update(_get_temperature_and_humidity())
+    finally:
+        _power_adc.value(0)
+        _power_dht.value(0)
+        _power_tsl.value(0)
     _save_sensor_data(data)
     return data
