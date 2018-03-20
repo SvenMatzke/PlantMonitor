@@ -38,7 +38,7 @@ def configure_sensor():
     :return: dict
     """
     _power_adc.value(1)
-    time.sleep(0.5)
+    time.sleep(1)
     try:
         config = {"adc_max": _adc.read()}
     except:
@@ -99,15 +99,17 @@ def sensor_data():
     """
     :rtype: dict
     """
+    data = dict(time=time.time())
     try:
         _power_adc.value(1)
         _power_dht.value(1)
         _power_tsl.value(1)
-        time.sleep(0.5)  # dht mag es nicht sofort abgerufen zu werden
-        data = dict(time=time.time())
+        time.sleep(2)  # dht ist erst nach 2 sekunden power zufur stabil
         data.update(_get_soil_moisture())
         data.update(_get_light_measure())
         data.update(_get_temperature_and_humidity())
+    except Exception as msg:
+        print(msg)
     finally:
         _power_adc.value(0)
         _power_dht.value(0)

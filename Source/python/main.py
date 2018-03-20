@@ -14,6 +14,7 @@ import settings
 import ujson
 import machine
 import ntptime
+import deepsleep
 
 # get config data
 print("Starting main routine")
@@ -59,6 +60,7 @@ accumulated_time = 0
 start_time = time.time()
 last_request_time = time.time()
 
+# TODO here wake on lan for 30 seconds if needed
 
 def shutdown_reached():
     return (time.time() - start_time) < restful_online_time and (time.time() - last_request_time) <= keep_alive_time
@@ -131,6 +133,12 @@ def _sensor_configure(writer, request):
     return userv.json(writer, configuration_data)
 
 
+def _send_deepsleep(writer, request):
+    deepsleep.set_awake_time_and_put_to_deepsleep(
+        loaded_settings.get("deepsleep_s", 100)
+    )
+
+
 def _get_settings(writer, request):
     global last_request_time
     last_request_time = time.time()
@@ -155,6 +163,7 @@ plant_app.add_route("/styles.bundle.css", _static_css, method='GET')
 plant_app.add_route("/rest/data", _get_data, method='GET')
 plant_app.add_route("/rest/sensor_history", _get_data, method='GET')
 plant_app.add_route("/rest/configure", _get_data, method='POST')
+plant_app.add_route("/rest/senddeepsleep", _send_deepsleep, method="POST")
 plant_app.add_route("/rest/settings", _get_settings, method='GET')
 plant_app.add_route("/rest/settings", _post_settings, method='POST')
 
@@ -162,8 +171,6 @@ plant_app.add_route("/rest/settings", _post_settings, method='POST')
 plant_app.run_server(
     timeout_callback=shutdown_reached
 )
-
-import deepsleep
 
 deepsleep.set_awake_time_and_put_to_deepsleep(
     loaded_settings.get("deepsleep_s", 100)
