@@ -20,8 +20,8 @@ def get_settings():
                     password=None,
                 ),
                 deepsleep_s=600,  # 10 minutes
-                keep_alive_time_s=30,
-                max_awake_time_s=120,  # 120 seconds after sending first request data.
+                keep_alive_time_s=5,
+                max_awake_time_s=20,  # 120 seconds after sending first request data.
                 awake_time_for_config=180,  # 3 minutes
                 request_url=None,
                 added_infos_to_sensor_data=dict(),  # this dict adds additional information for the posted sensor_data
@@ -37,8 +37,8 @@ def get_settings():
                     password=None,
                 ),
                 deepsleep_s=600,  # 10 minutes
-                keep_alive_time_s=30,
-                max_awake_time_s=120,  # 120 seconds after sending first request data.
+                keep_alive_time_s=5,
+                max_awake_time_s=20,  # 120 seconds after sending first request data.
                 awake_time_for_config=180,  # 3 minutes
                 request_url=None,
                 added_infos_to_sensor_data=dict(),  # this dict adds additional information for the posted sensor_data

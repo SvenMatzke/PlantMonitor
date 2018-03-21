@@ -19,9 +19,10 @@ import deepsleep
 # get config data
 print("Starting main routine")
 loaded_settings = settings.get_settings()
-# if anything fails we are ready to set up
-restful_online_time = loaded_settings.get('awake_time_for_config', 300)
-keep_alive_time = restful_online_time
+
+# normal awake time
+keep_alive_time = loaded_settings.get('keep_alive_time_s')
+restful_online_time = loaded_settings.get('max_awake_time_s')
 
 # update time
 if wlan.sta_if.isconnected():
@@ -44,15 +45,13 @@ if wlan.sta_if.isconnected():
             if int(response.status_code) >= 300:
                 raise ConnectionError("Response was incorrect")
 
-            keep_alive_time = loaded_settings.get('keep_alive_time_s')
-            restful_online_time = loaded_settings.get('max_awake_time_s')
         except Exception as e:
             # data was not send so we will need some config changes
-            restful_online_time = loaded_settings.get('awake_time_for_config', 300)
+            print("Request could not be send might need a hard reset for config")
 
 if machine.reset_cause() == machine.HARD_RESET:
     print("Hard reset its config time")
-    restful_online_time = 300  # config time will be hard set
+    restful_online_time = loaded_settings.get('awake_time_for_config', 300)
     keep_alive_time = restful_online_time
 
 # webserver will be started to listen
@@ -60,7 +59,6 @@ accumulated_time = 0
 start_time = time.time()
 last_request_time = time.time()
 
-# TODO here wake on lan for 30 seconds if needed
 
 def shutdown_reached():
     return (time.time() - start_time) < restful_online_time and (time.time() - last_request_time) <= keep_alive_time
@@ -161,8 +159,8 @@ plant_app.add_route("/", _index, method='GET')
 plant_app.add_route("/app.bundle.js", _static_js, method='GET')
 plant_app.add_route("/styles.bundle.css", _static_css, method='GET')
 plant_app.add_route("/rest/data", _get_data, method='GET')
-plant_app.add_route("/rest/sensor_history", _get_data, method='GET')
-plant_app.add_route("/rest/configure", _get_data, method='POST')
+plant_app.add_route("/rest/sensor_history", _history_data, method='GET')
+plant_app.add_route("/rest/configure", _sensor_configure, method='POST')
 plant_app.add_route("/rest/senddeepsleep", _send_deepsleep, method="POST")
 plant_app.add_route("/rest/settings", _get_settings, method='GET')
 plant_app.add_route("/rest/settings", _post_settings, method='POST')

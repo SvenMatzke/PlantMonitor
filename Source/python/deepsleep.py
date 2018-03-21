@@ -2,8 +2,6 @@ import machine
 
 rtc = machine.RTC()
 
-def set_awake_time_and_put_to_sleep():
-    pass
 
 def set_awake_time_and_put_to_deepsleep(time_in_s):
     # configure RTC.ALARM0 to be able to wake the device
