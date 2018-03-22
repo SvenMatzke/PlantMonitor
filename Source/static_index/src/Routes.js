@@ -68,21 +68,21 @@ class SettingsComp extends Component {
       });
   }
 
-  submitNewSettings(event){
-    const { settings, acts } = this.props;
-    axios.post('/rest/settings', settings)
-    event.preventDefault();
+  submitNewSettings(settings){
+    const { settt, acts } = this.props;
+    acts.updateSettings(settings);
+    axios.post('/rest/settings', settings);
   }
 
   render() {
     const { settings, acts } = this.props;
     return(
-      <form onSubmit={this.submitNewSettings}>
+      <form onSubmit={event => {this.submitNewSettings(settings);event.preventDefault();}}>
         <div className="form-row">
           <div className="form-group col-md-6">
              <label for="inputssid">SSID</label>
-             <input type="text" className="form-control" id="inputssid" placeholder="SSID" value={settings.wlan.ssid}
-              />
+             <input type="text" className="form-control" id="inputssid" placeholder="SSID"  defaultValue={settings.wlan.ssid}
+              onChange={event => settings.wlan.ssid = event.target.value} />
            </div>
            <div className="form-group col-md-6">
              <label for="inputPassword">Password</label>
@@ -125,7 +125,7 @@ class SettingsComp extends Component {
 
 const Settings = connect(
   state => ({settings: state.settings }),
-  dispatch=> { acts: bindActionCreators(actions, dispatch) }
+  dispatch=> ({ acts: bindActionCreators(actions, dispatch) })
 )(SettingsComp)
 
 export {CurrentData, Settings};
