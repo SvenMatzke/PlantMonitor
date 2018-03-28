@@ -20,16 +20,15 @@ history_sensor_data_file = "sensor_data_log.json"
 
 # all power off
 _power_adc.value(0)
-_power_dht.value(0)
+_power_dht.value(1)
 _power_tsl.value(0)
+time.sleep(2)
 
 
 def _save_sensor_data(sensor_data):
     file_ptr = open(history_sensor_data_file, "a")
-    bytes_written = file_ptr.write(ujson.dumps(sensor_data)+"\n")
-    end_of_stream = file_ptr.tell()
+    file_ptr.write(ujson.dumps(sensor_data)+"\n")
     file_ptr.close()
-    # TODO need to cleanup data at some point
 
 
 def configure_sensor():
@@ -102,9 +101,7 @@ def sensor_data():
     data = dict(time=time.time())
     try:
         _power_adc.value(1)
-        _power_dht.value(1)
         _power_tsl.value(1)
-        time.sleep(2)  # dht ist erst nach 2 sekunden power zufur stabil
         data.update(_get_soil_moisture())
         data.update(_get_light_measure())
         data.update(_get_temperature_and_humidity())
@@ -112,7 +109,6 @@ def sensor_data():
         print(msg)
     finally:
         _power_adc.value(0)
-        _power_dht.value(0)
         _power_tsl.value(0)
     _save_sensor_data(data)
     return data
