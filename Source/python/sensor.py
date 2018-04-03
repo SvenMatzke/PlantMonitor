@@ -99,16 +99,18 @@ def sensor_data():
     :rtype: dict
     """
     data = dict(time=time.time())
-    try:
-        _power_adc.value(1)
-        _power_tsl.value(1)
-        data.update(_get_soil_moisture())
-        data.update(_get_light_measure())
-        data.update(_get_temperature_and_humidity())
-    except Exception as msg:
-        print(msg)
-    finally:
-        _power_adc.value(0)
-        _power_tsl.value(0)
+    _power_adc.value(1)
+    _power_tsl.value(1)
+    start_time = time.time()
+    while time.time() <= start_time + 3:
+        try:
+            data.update(_get_soil_moisture())
+            data.update(_get_light_measure())
+            data.update(_get_temperature_and_humidity())
+        except Exception as msg:
+            print(msg)
+
+    _power_adc.value(0)
+    _power_tsl.value(0)
     _save_sensor_data(data)
     return data

@@ -27,7 +27,7 @@ function configure_sensor(){
 }
 
 function get_sensor_history(){
-  axios.get('/rest/get_sensor_history')
+  axios.get('/rest/sensor_history')
     .then((response) => {
         store.dispatch(actions.updateSettings(response.data))
     }).catch((err) => {

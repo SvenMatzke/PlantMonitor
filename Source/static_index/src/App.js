@@ -170,9 +170,10 @@ Menue = withStyles(rootStyles)(Menue);
 
 class App extends Component {
     componentWillMount() {
-      get_settings();
-      get_sensor_data();
-      get_sensor_history();
+      get_settings()
+      alert("smth")
+      get_sensor_data()
+      get_sensor_history()
     }
 
     set_deep_sleep(){
