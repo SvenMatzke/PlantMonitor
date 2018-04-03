@@ -114,22 +114,16 @@ def _parse_request(request_string):
 
 
 def text(writer, data, status=200, content_type="text/html", headers=None):
-    if headers is None:
-        headers = list()
-    else:
-        headers = list(headers)
-    html_string = b"%s" \
-                  b"%s\r\n" % (
-                      _response_header(
-                          status=status,
-                          content_type=content_type,
-                          content_length=len(data),
-                          headers=headers
-                      ),
-                      data
-                  )
-
-    writer.write(html_string)
+    writer.write(
+        _response_header(
+            status=status,
+            content_type=content_type,
+            content_length=len(data),
+            headers=headers
+        )
+    )
+    writer.write(data)
+    writer.write(b'\r\n')
 
 
 def json(writer, data, status=200, headers=None):
