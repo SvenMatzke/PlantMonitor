@@ -90,7 +90,7 @@ def run_server(buf, restful_online_time, keep_alive_time, loaded_settings, error
         try:
             new_settings = ujson.loads(request.get('body'))
         except Exception as e:
-            error_log.write(ujson.dumps({'error': str(e)}) + "\n")
+            error_log.write(ujson.dumps({'time': time.time(), 'error': str(e)}) + "\n")
             return userv.json(writer, {"message": "Request had no valid json body."}, status=406)
         updated_settings = settings.save_settings(settings.get_settings(), new_settings)
         return userv.json(writer, updated_settings)

@@ -19,6 +19,7 @@ def get_settings():
                     ssid=None,
                     password=None,
                 ),
+                reads_without_send=15,
                 deepsleep_s=600,  # 10 minutes
                 keep_alive_time_s=5,
                 max_awake_time_s=20,  # 120 seconds after sending first request data.
@@ -36,6 +37,7 @@ def get_settings():
                     ssid=None,
                     password=None,
                 ),
+                reads_without_send=15,
                 deepsleep_s=600,  # 10 minutes
                 keep_alive_time_s=5,
                 max_awake_time_s=20,  # 120 seconds after sending first request data.
@@ -64,6 +66,10 @@ def save_settings(old_config, new_config):
                                                 password=None,
                                             )
                                             )
+    # reads
+    reads_without_send = new_config.get('reads_without_send', old_config.get("reads_without_send", 15))
+    if reads_without_send < 1:
+        new_config['reads_without_send'] = 1
 
     # Deepsleep
     deepsleep_s = new_config.get('deepsleep_s', old_config.get('deepsleep_s', 600))

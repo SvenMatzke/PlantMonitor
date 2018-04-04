@@ -6,11 +6,13 @@ ap_if = network.WLAN(network.AP_IF)
 
 
 def connect_to_existing_network(essid, password):
-    print('connecting to network...')
-    sta_if.active(True)
     if essid is None or password is None:
         print('essid or password is not set')
         return False
+
+    print('connecting to network...')
+    sta_if.active(True)
+
     sta_if.connect(essid, password)
     start_time = time.time()
     print("connecting")

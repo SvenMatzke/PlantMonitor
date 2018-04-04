@@ -56,7 +56,7 @@ def _load_configuration():
     if _config_file in os.listdir():
         file_ptr = open(_config_file, "r")
         try:
-            read_file =file_ptr.read()
+            read_file = file_ptr.read()
             loaded_config = ujson.loads(read_file)
         except ValueError:
             os.remove(_config_file)
@@ -109,8 +109,8 @@ def sensor_data():
             data.update(_get_temperature_and_humidity())
         except Exception as msg:
             print(msg)
-
     _power_adc.value(0)
     _power_tsl.value(0)
-    _save_sensor_data(data)
+    if len(data) >= 5:
+        _save_sensor_data(data)
     return data
