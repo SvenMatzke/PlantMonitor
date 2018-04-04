@@ -22,9 +22,10 @@ try:
     wlan.ap_if.active(False)
     wlan.sta_if.active(False)
 
-    print("Starting main routine")
+    print("Starting boot routine")
     loaded_settings = settings.get_settings()
     reads_without_send = loaded_settings.get("reads_without_send", 10)
+    request_url = loaded_settings.get("request_url", None)
 
     # load batch data
     if _batch_file in os.listdir():
@@ -40,12 +41,14 @@ try:
     batches.append(sensor_data)
 
     # save batch data
+    # and only save max reads batches
     _batch_file_ptr = open(_batch_file, "w")
-    _batch_file_ptr.write(ujson.dumps(batches))
+    _batch_file_ptr.write(ujson.dumps(batches[-reads_without_send:]))
     _batch_file_ptr.close()
 
-    # if we have enough batches
-    if len(batches) >= reads_without_send:
+    # if we have enough batches and a request_url
+    # hard reset starts webserver
+    if (len(batches) >= reads_without_send and request_url is not None) or machine.reset_cause() == machine.HARD_RESET:
         wlan_config = loaded_settings.get('wlan', {})
 
         print("connect existing network")
@@ -61,6 +64,7 @@ try:
         if wlan.sta_if.isconnected():
             ntptime.settime()
 except Exception as e:
+    print(e)
     error_file_ptr.write(ujson.dumps({'time': time.time(), 'error': "boot: " + str(e)}) + "\n")
 finally:
     error_file_ptr.close()
