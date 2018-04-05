@@ -1,2 +1,4 @@
 adafruit-ampy
 esptool
+flask
+flask-cors

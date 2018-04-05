@@ -1,11 +1,9 @@
 import gc
 import wlan
 import os
+import error
 
-_error_log_file = "error.log"
 _batch_file = "batch_file.json"
-
-error_file_ptr = open(_error_log_file, "a")
 
 loaded_settings = {}
 
@@ -46,12 +44,12 @@ try:
                 )
 
                 if int(response.status_code) >= 300:
-                    error_file_ptr.write(
-                        ujson.dumps({'time': time.time(), 'status': response.status_code, 'body': response.body}) + "\n"
+                    error.add_error(
+                        ujson.dumps({'time': time.time(), 'status': response.status_code, 'body': response.body})
                     )
 
         except Exception as e:
-            error_file_ptr.write(ujson.dumps({'time': time.time(), 'error': "Sending batches: " + str(e)}) + "\n")
+            error.add_error(ujson.dumps({'time': time.time(), 'error': "Sending batches: " + str(e)}))
         finally:
             _batch_file_ptr.close()
             os.remove(_batch_file)
@@ -65,11 +63,10 @@ try:
 
         # power up esp while running the server
         machine.freq(160000000)
-        server.run_server(buf, restful_online_time, keep_alive_time, loaded_settings, error_file_ptr)
+        server.run_server(buf, restful_online_time, keep_alive_time, loaded_settings)
 except Exception as e:
-    error_file_ptr.write(ujson.dumps({'time': time.time(), 'error': "main: " + str(e)}) + "\n")
+    error.add_error(ujson.dumps({'time': time.time(), 'error': "main: " + str(e)}))
 finally:
-    error_file_ptr.close()
     gc.collect()
     machine.freq(80000000)
     wlan.ap_if.active(False)

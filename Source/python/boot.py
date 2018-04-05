@@ -1,12 +1,10 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 import gc
-
+import error
 gc.collect()
 
-_error_log_file = "error.log"
 _batch_file = "batch_file.json"
 
-error_file_ptr = open(_error_log_file, "a")
 
 try:
     import wlan
@@ -65,7 +63,6 @@ try:
             ntptime.settime()
 except Exception as e:
     print(e)
-    error_file_ptr.write(ujson.dumps({'time': time.time(), 'error': "boot: " + str(e)}) + "\n")
+    error.add_error(ujson.dumps({'time': time.time(), 'error': "boot: " + str(e)}))
 finally:
-    error_file_ptr.close()
     gc.collect()
