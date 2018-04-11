@@ -57,17 +57,20 @@ def run_server(buf, restful_online_time, keep_alive_time, loaded_settings):
             file_ptr = open(sensor.history_sensor_data_file, "r")
             read = ""
             while True:
-                if read != "":
-                    writer.write(",")
+                last_read = read
                 read = file_ptr.readline().replace("\n", "")
-                writer.write(read)
-                gc.collect()
                 if read == "":
                     break
+                else:
+                    if last_read != "":
+                        writer.write(",")
+                    writer.write(read)
+                gc.collect()
+
             file_ptr.close()
 
         writer.write("]")
-        return
+        return True
 
     def _sensor_configure(writer, request):
         global last_request_time

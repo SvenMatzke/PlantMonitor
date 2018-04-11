@@ -1,13 +1,20 @@
 import { createStore, combineReducers } from 'redux';
-var Immutable = require('immutable');
 
 const initialState = {
-    sensor_history: Immutable.List([]),
+    sensor_history: [
+      {
+        "soil moisture": 0,
+        "humidity": 0,
+        "light": 0,
+        "temperature": 0,
+        "time": 0
+      }
+    ],
     data: {
       "soil moisture": 0,
-      "humidiy": 0,
+      "humidity": 0,
       "light": 0,
-      "temperature": 0,
+      "temperature": 0
     },
     settings: {
       "wlan" : {
@@ -21,7 +28,7 @@ const initialState = {
       "request_url" : "",
       "added_infos_to_sensor_data" : {}
     },
-    errormessages: Immutable.List([])
+    errormessages: []
 }
 
 const sensorReducer = (state = initialState.data, action) => {
@@ -36,7 +43,7 @@ const sensorReducer = (state = initialState.data, action) => {
 const sensorHistoryReducer = (state = initialState.sensor_history, action) => {
     switch(action.type){
         case 'SENSOR_DATA_HISTORY':
-            return Immutable.List(action.data);
+            return [... action.data];
         default:
             return state;
     }
@@ -45,7 +52,7 @@ const sensorHistoryReducer = (state = initialState.sensor_history, action) => {
 const settingsReducer = (state = initialState.settings, action) => {
     switch(action.type){
         case 'UPDATE_SETTINGS':
-            return action.data;
+            return Object.assign({}, state, action.data);
         default:
             return state;
     }
@@ -54,7 +61,7 @@ const settingsReducer = (state = initialState.settings, action) => {
 const errorReducer = (state = initialState.errormessages, action) => {
   switch(action.type){
       case 'ADD_ERROR':
-          return state.push(action.data);
+          return [... action.data];
       default:
           return state;
   }

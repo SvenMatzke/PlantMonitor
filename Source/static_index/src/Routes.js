@@ -5,6 +5,7 @@ import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
+import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
 
 
 const styles = theme => ({
@@ -24,20 +25,48 @@ const styles = theme => ({
 
 class Home extends Component {
 
+  constructor(props) {
+    super(props);
+    this.state = store.getState().sensor_history;
+    // TODO update rerender over subscribe kills the chart but why
+    // store.subscribe(
+    //     () => {
+    //       let new_state=store.getState().sensor_history
+    //       console.log(new_state)
+    //       this.setState(new_state)
+    //     }
+    // )
+  }
   render() {
     return(
-      <div>
-      data
-      </div>
+      <LineChart width={700} height={450} data={this.state}
+            margin={{top: 50, right: 30, left: 20, bottom: 5}}>
+       <XAxis dataKey="time"/>
+       <YAxis/>
+       <CartesianGrid strokeDasharray="3 3"/>
+       <Tooltip/>
+       <Legend />
+       <Line type="monotone" dataKey="temperature" stroke="#8b3333" activeDot={{r: 2}}/>
+       <Line type="monotone" dataKey="light" stroke="#a1a100" />
+       <Line type="monotone" dataKey="humidity" stroke="#00539c" />
+       <Line type="monotone" dataKey="soil moisture" stroke="#4b4833" />
+      </LineChart>
     )
   }
 }
 
 class SettingsComp extends Component {
+  constructor(props) {
+    super(props);
+    this.state = store.getState().settings;
+    store.subscribe(
+        () => this.setState(store.getState().settings)
+    )
+  }
 
   render() {
     const { classes } = this.props;
-    const settings = store.getState().settings;
+    const settings = this.state;
     return(
       <form className={classes.container} noValidate autoComplete="off"
             onSubmit={event => {post_settings(settings);event.preventDefault();}} >
@@ -64,6 +93,14 @@ class SettingsComp extends Component {
            className={classes.textField}
            defaultValue={settings.request_url}
            onChange={event => settings.request_url = event.target.value}
+           margin="normal"
+        />
+        <TextField
+           id="reads_without_send"
+           label="reads without send"
+           className={classes.textField}
+           defaultValue={settings.reads_without_send}
+           onChange={event => settings.reads_without_send = event.target.value}
            margin="normal"
         />
         <TextField
