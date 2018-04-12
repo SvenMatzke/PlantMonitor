@@ -21,6 +21,7 @@ const initialState = {
          "ssid" : "",
          "password" : ""
       },
+      "reads_without_send": 18,
       "deepsleep_s" : 600,
       "keep_alive_time_s" : 30,
       "max_awake_time_s" : 120,

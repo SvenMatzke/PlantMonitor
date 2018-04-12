@@ -22,7 +22,7 @@ import ReloadIcon from 'material-ui-icons/Loop';
 
 import {store} from './reducer.js';
 import {Home, Settings} from './Routes';
-import {get_sensor_history, get_sensor_data, get_settings, send_deep_sleep} from './rest_request.js';
+import {get_sensor_data, send_deep_sleep} from './rest_request.js';
 
 const drawerWidth = 270;
 
@@ -182,11 +182,8 @@ class App extends Component {
       this.reload()
     }
 
-
     reload(){
       get_sensor_data()
-      get_settings()
-      get_sensor_history()
     }
 
     set_deep_sleep(){

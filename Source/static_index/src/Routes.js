@@ -6,6 +6,7 @@ import Button from 'material-ui/Button';
 import PropTypes from 'prop-types';
 import { withStyles } from 'material-ui/styles';
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend} from 'recharts';
+import {get_settings, get_sensor_history} from './rest_request.js';
 
 
 const styles = theme => ({
@@ -24,22 +25,19 @@ const styles = theme => ({
 });
 
 class Home extends Component {
-
-  constructor(props) {
-    super(props);
-    this.state = store.getState().sensor_history;
-    // TODO update rerender over subscribe kills the chart but why
-    // store.subscribe(
-    //     () => {
-    //       let new_state=store.getState().sensor_history
-    //       console.log(new_state)
-    //       this.setState(new_state)
-    //     }
-    // )
+  componentDidMount() {
+    get_sensor_history()
   }
+
   render() {
+    store.subscribe(
+        () => {
+          this.setState(store.getState().sensor_history);
+        }
+    )
+
     return(
-      <LineChart width={700} height={450} data={this.state}
+      <LineChart width={700} height={450} data={store.getState().sensor_history}
             margin={{top: 50, right: 30, left: 20, bottom: 5}}>
        <XAxis dataKey="time"/>
        <YAxis/>
@@ -56,17 +54,23 @@ class Home extends Component {
 }
 
 class SettingsComp extends Component {
-  constructor(props) {
-    super(props);
-    this.state = store.getState().settings;
-    store.subscribe(
-        () => this.setState(store.getState().settings)
-    )
+
+  componentDidMount() {
+    get_settings()
   }
 
   render() {
     const { classes } = this.props;
     const settings = this.state;
+    store.subscribe(
+        () => {
+          this.setState(store.getState().settings);
+        }
+    )
+
+    if(!this.state){
+      return "loading"
+    }
     return(
       <form className={classes.container} noValidate autoComplete="off"
             onSubmit={event => {post_settings(settings);event.preventDefault();}} >
