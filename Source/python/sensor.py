@@ -4,6 +4,7 @@ import time
 import tsl2561
 import ujson
 import os
+import gc
 
 _power_adc = machine.Pin(14, machine.Pin.OUT)
 _adc = machine.ADC(0)
@@ -22,13 +23,37 @@ history_sensor_data_file = "sensor_data_log.json"
 _power_adc.value(0)
 _power_dht.value(1)
 _power_tsl.value(0)
-time.sleep(2)
+
+
+def _trim_sensor_data(total_lines, keep_lines):
+    os.rename(history_sensor_data_file, "temp.json")
+    file_ptr = open("temp.json", "r")
+    for _ in range(0, total_lines-keep_lines):
+        file_ptr.readline()
+        gc.collect()
+    new_file_ptr = open(history_sensor_data_file, "a")
+    while True:
+        read = file_ptr.readline()
+        if read == "":
+            break
+        else:
+            new_file_ptr.write(read)
+        gc.collect()
+
+    new_file_ptr.close()
+    file_ptr.close()
+    os.remove("temp.json")
 
 
 def _save_sensor_data(sensor_data):
+    string_to_write = ujson.dumps(sensor_data)+"\n"
     file_ptr = open(history_sensor_data_file, "a")
     file_ptr.write(ujson.dumps(sensor_data)+"\n")
+    end_byte = file_ptr.tell()
     file_ptr.close()
+    assumed_total_lines = int(end_byte) // len(string_to_write)
+    if assumed_total_lines > 1200:
+        _trim_sensor_data(assumed_total_lines, 1000)
 
 
 def configure_sensor():

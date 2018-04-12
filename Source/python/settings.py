@@ -19,10 +19,10 @@ def get_settings():
                     ssid=None,
                     password=None,
                 ),
-                reads_without_send=15,
+                reads_without_send=18,
                 deepsleep_s=600,  # 10 minutes
-                keep_alive_time_s=5,
-                max_awake_time_s=20,  # 120 seconds after sending first request data.
+                keep_alive_time_s=10,
+                max_awake_time_s=30,  # 120 seconds after sending first request data.
                 awake_time_for_config=180,  # 3 minutes
                 request_url=None,
                 added_infos_to_sensor_data=dict(),  # this dict adds additional information for the posted sensor_data
@@ -37,10 +37,10 @@ def get_settings():
                     ssid=None,
                     password=None,
                 ),
-                reads_without_send=15,
+                reads_without_send=18,
                 deepsleep_s=600,  # 10 minutes
-                keep_alive_time_s=5,
-                max_awake_time_s=20,  # 120 seconds after sending first request data.
+                keep_alive_time_s=10,
+                max_awake_time_s=30,  # 120 seconds after sending first request data.
                 awake_time_for_config=180,  # 3 minutes
                 request_url=None,
                 added_infos_to_sensor_data=dict(),  # this dict adds additional information for the posted sensor_data
@@ -67,7 +67,7 @@ def save_settings(old_config, new_config):
                                             )
                                             )
     # reads
-    reads_without_send = new_config.get('reads_without_send', old_config.get("reads_without_send", 15))
+    reads_without_send = new_config.get('reads_without_send', old_config.get("reads_without_send", 18))
     if reads_without_send < 1:
         new_config['reads_without_send'] = 1
 

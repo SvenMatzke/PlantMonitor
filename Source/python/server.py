@@ -42,7 +42,7 @@ def run_server(buf, restful_online_time, keep_alive_time, loaded_settings):
         last_request_time = time.time()
 
         content_len = 0
-        if sensor.history_sensor_data_file not in os.listdir():
+        if sensor.history_sensor_data_file in os.listdir():
             content_len = os.stat(sensor.history_sensor_data_file)[6]
 
         writer.write(
