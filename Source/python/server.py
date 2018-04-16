@@ -3,6 +3,7 @@ import time
 import userv
 import sensor
 import settings
+import machine
 import ujson
 import deepsleep
 import os
@@ -79,6 +80,7 @@ def run_server(buf, restful_online_time, keep_alive_time, loaded_settings):
         return userv.json(writer, configuration_data)
 
     def _send_deepsleep(writer, request):
+        machine.freq(80000000)
         deepsleep.set_awake_time_and_put_to_deepsleep(
             loaded_settings.get("deepsleep_s", 100)
         )
@@ -103,7 +105,8 @@ def run_server(buf, restful_online_time, keep_alive_time, loaded_settings):
     plant_app.add_route("/", _index, method='GET')
     plant_app.add_route("/app.bundle.js", _static_js, method='GET')
     plant_app.add_route("/rest/data", _get_data, method='GET')
-    plant_app.add_route("/rest/sensor_history", _history_data, method='GET')
+    plant_app.add_route("/rest/sensor_history", _history_data, method='GET')  # TODO delete of sensor data
+    # TODO get and delete of errror log
     plant_app.add_route("/rest/configure", _sensor_configure, method='POST')
     plant_app.add_route("/rest/senddeepsleep", _send_deepsleep, method="POST")
     plant_app.add_route("/rest/settings", _get_settings, method='GET')

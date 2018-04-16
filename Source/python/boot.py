@@ -1,10 +1,10 @@
 # This file is executed on every boot (including wake-boot from deepsleep)
 import gc
 import error
+import time
 gc.collect()
 
 _batch_file = "batch_file.json"
-
 
 try:
     import wlan
@@ -14,7 +14,6 @@ try:
     import ntptime
     import sensor
     import os
-    import time
 
     print("deactivate wlan")
     wlan.ap_if.active(False)
