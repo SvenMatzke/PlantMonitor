@@ -6,20 +6,30 @@ The source for now is fully functioning webserver backend and a webfrontend writ
 For all wireing we need wires so always keep in mind you will need those in addition to your chips and power. 
 
 # Hardware (Sensor Part):
-  - adafruit breakout esp8266
-  - dht22
-  - tsl2561
-  - soil moisture sensor mit LM393 chip
+  - adafruit breakout esp8266  (10 €)
+  - dht22 (AM2302) (5 €)
+  - Adafruit TSL2561 Digital Luminosity Lux Light Sensor Breakout (7 €)
+  - soil moisture sensor mit LM393 chip (4 €)
   - 2 suitable resistor i have 1 *330k and 1*100k Ohm to breakdown the output voltage lower then 1 V for analog in of the esp 
   - usb serial converter to flash software
-  - TODO (reset button)
-  
+  - Reset-Push Button (1 €)
+ 
+costs without flasher around 27 € 
+ 
+# 2nd iteration will be an smaller esp
+ - AI-Thinker ESP8266 ESP-08 (4 €)
+
+costs will be lowered to 21 €
+
 # Hardware (Power supply Part)
 For the Power supply part we use simple AA Rechargeable batteries and a step up chip to get our needed 3.3 V
 In the future it is planed that the power and sensor part are seperate in design. Because there are multiple solutions for 
 powering up an esp and less variants regarding getting the sensor data we want.
   - 2 AA recharable batteries
-  - 1 linear step-up to 3.3 V
+  - 1 linear step-up to 3.3 V (5 €)
+  - Romi Battery Contact Set (2 € for 2 sets) 
+ 
+costs without batteries 7€
     
     
 # First Installation

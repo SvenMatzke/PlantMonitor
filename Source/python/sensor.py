@@ -10,6 +10,17 @@ import error
 _adc = None
 _dht = None
 _light_sensor = None
+_power = machine.Pin(13, machine.Pin.OUT)
+_power.value(1)
+
+
+def power_on():
+    _power.value(1)
+
+
+def power_off():
+    _power.value(0)
+
 
 try:
     _adc = machine.ADC(0)
@@ -25,12 +36,12 @@ try:
     _scl = machine.Pin(14)
     _sda = machine.Pin(2)
     _i2c = machine.I2C(scl=_scl, sda=_sda)
-    _light_sensor = tsl2561.TSL2561(_i2c, address=0x39)
 except Exception:
     error.add_error("Lightsensor is not running.")
 
 _config_file = "sensor_config.json"
 history_sensor_data_file = "sensor_data_log.json"
+power_off()
 
 
 def _trim_sensor_data(total_lines, keep_lines):
@@ -69,11 +80,15 @@ def configure_sensor():
     saves max sensor values for configuration
     :return: dict
     """
+    power_on()
     time.sleep(1)
     try:
         config = {"adc_max": _adc.read()}
     except:
+        power_off()
         return {"adc_max": 1024}
+    finally:
+        power_off()
 
     file_ptr = open(_config_file, "w")
     try:
@@ -128,9 +143,7 @@ def _get_temperature_and_humidity():
 
 
 def _get_light_measure():
-    if _light_sensor is None:
-        return (("light", -1),)
-
+    _light_sensor = tsl2561.TSL2561(_i2c, address=0x39)
     return (("light", _light_sensor.read()),)
 
 
@@ -140,13 +153,18 @@ def sensor_data():
     """
     data = dict(time=time.time())
     start_time = time.time()
+    power_on()
+
     while time.time() <= start_time + 3:
         try:
+            gc.collect()
             data.update(_get_soil_moisture())
             data.update(_get_light_measure())
             data.update(_get_temperature_and_humidity())
         except Exception as msg:
             print(msg)
+    power_off()
+
     if len(data) >= 5:
         _save_sensor_data(data)
     return data

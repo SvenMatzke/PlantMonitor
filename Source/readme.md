@@ -35,6 +35,7 @@ https://pypi.python.org/pypi/tsl2561/3.3
 sda=2 scl=14 
 adc lower 1 v
 
+unpowering light sensor_connection renders sensor useless so you cant unpower it
 # 
 
 

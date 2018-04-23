@@ -10,8 +10,8 @@ loaded_settings = {}
 try:
     gc.collect()
 
-    buf = bytearray(2048)
-
+    buf = bytearray(4000)
+    import deepsleep
     import time
     import urequests
     import userv
@@ -19,7 +19,6 @@ try:
     import settings
     import ujson
     import machine
-    import deepsleep
     import server
 
     # get config data
@@ -63,6 +62,7 @@ try:
 
         # power up esp while running the server
         machine.freq(160000000)
+        print("Mem free: "+str(gc.mem_free()))
         server.run_server(buf, restful_online_time, keep_alive_time, loaded_settings)
 except Exception as e:
     error.add_error(ujson.dumps({'time': time.time(), 'error': "main: " + str(e)}))
