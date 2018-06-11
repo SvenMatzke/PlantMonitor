@@ -36,6 +36,8 @@ sda=2 scl=14
 adc lower 1 v
 
 unpowering light sensor_connection renders sensor useless so you cant unpower it
+
+when starting server you need little above 9 k memory to run esp
 # 
 
 

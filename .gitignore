@@ -97,6 +97,7 @@ ENV/
 # mkdocs documentation
 /site
 
+*.FCStd1
 # mypy
 .mypy_cache/
 /Source/static_index/node_modules/*
