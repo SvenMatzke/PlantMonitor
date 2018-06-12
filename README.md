@@ -17,16 +17,30 @@ For all wireing we need wires so always keep in mind you will need those in addi
 costs without flasher around 27 € 
  
 # 2nd iteration will be an smaller esp
- - AI-Thinker ESP8266 ESP-08 (4 €)
+ - AI-Thinker ESP8266 ESP-08 (3.93 €)
+    https://eckstein-shop.de/AI-Thinker-ESP8266-ESP-12F-Serial-WIFI-Wireless-Remote-Control-Module
+ - dht22 (AM2302) (4.95 €)
+   https://eckstein-shop.de/DHT22-Digital-Temperatur-und-Feuchtigkeits-Sensor-Modul-AM2302-mit-Jumperkabel
+ - BH1750FVI GY-30 (2.95 €)
+    https://eckstein-shop.de/BH1750FVI-GY-30-Licht-Helligkeitssensor-Modul-Digital-Light-intensity-Sensor-fuer-Arduino
+ - Soil Moisture Sensor (3.56 €)
+    https://eckstein-shop.de/Moisture-Sensor
+ - Reset Buttons (1.95 € for 10)
+    https://eckstein-shop.de/10-Stk-6x6x6mm-DIP-4-mini-Drucktaster-Eingabetaster-AC-250V-DC-12V-50mA
+costs will be lowered to 15,59 €
 
-costs will be lowered to 21 €
+Conntector
+ -  cable
+ - ...
 
 # Hardware (Power supply Part)
 For the Power supply part we use simple AA Rechargeable batteries and a step up chip to get our needed 3.3 V
 In the future it is planed that the power and sensor part are seperate in design. Because there are multiple solutions for 
 powering up an esp and less variants regarding getting the sensor data we want.
   - 2 AA recharable batteries
-  - 1 linear step-up to 3.3 V (5 €)
+  - 1 Booster step-up to 3.3 V (4,49 €)
+    https://eckstein-shop.de/Pololu-33V-Step-Up-Spannungsregler-U1V10F3
+  - battery holder or
   - Romi Battery Contact Set (2 € for 2 sets) 
  
 costs without batteries 7€
