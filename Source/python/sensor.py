@@ -44,37 +44,6 @@ history_sensor_data_file = "sensor_data_log.json"
 power_off()
 
 
-def _trim_sensor_data(total_lines, keep_lines):
-    os.rename(history_sensor_data_file, "temp.json")
-    file_ptr = open("temp.json", "r")
-    for _ in range(0, total_lines - keep_lines):
-        file_ptr.readline()
-        gc.collect()
-    new_file_ptr = open(history_sensor_data_file, "a")
-    while True:
-        read = file_ptr.readline()
-        if read == "":
-            break
-        else:
-            new_file_ptr.write(read)
-        gc.collect()
-
-    new_file_ptr.close()
-    file_ptr.close()
-    os.remove("temp.json")
-
-
-def _save_sensor_data(sensor_data):
-    string_to_write = ujson.dumps(sensor_data) + "\n"
-    file_ptr = open(history_sensor_data_file, "a")
-    file_ptr.write(ujson.dumps(sensor_data) + "\n")
-    end_byte = file_ptr.tell()
-    file_ptr.close()
-    assumed_total_lines = int(end_byte) // len(string_to_write)
-    if assumed_total_lines > 1200:
-        _trim_sensor_data(assumed_total_lines, 1000)
-
-
 def configure_sensor():
     """
     saves max sensor values for configuration
@@ -146,25 +115,3 @@ def _get_light_measure():
     _light_sensor = tsl2561.TSL2561(_i2c, address=0x39)
     return (("light", _light_sensor.read()),)
 
-
-def sensor_data():
-    """
-    :rtype: dict
-    """
-    data = dict(time=time.time())
-    start_time = time.time()
-    power_on()
-
-    while time.time() <= start_time + 3:
-        try:
-            gc.collect()
-            data.update(_get_soil_moisture())
-            data.update(_get_light_measure())
-            data.update(_get_temperature_and_humidity())
-        except Exception as msg:
-            print(msg)
-    power_off()
-
-    if len(data) >= 5:
-        _save_sensor_data(data)
-    return data

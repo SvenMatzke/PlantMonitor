@@ -46,20 +46,7 @@ try:
     # if we have enough batches and a request_url
     # hard reset starts webserver
     if (len(batches) >= reads_without_send and request_url is not None) or machine.reset_cause() == machine.HARD_RESET:
-        wlan_config = loaded_settings.get('wlan', {})
 
-        print("connect existing network")
-        network_connected = wlan.connect_to_existing_network(
-            essid=wlan_config.get('ssid'),
-            password=wlan_config.get('password'),
-        )
-        # only create a network when its a hard reset and no network is connected
-        if not network_connected and machine.reset_cause() == machine.HARD_RESET:
-            wlan.create_an_network()
-
-        # update time
-        if wlan.sta_if.isconnected():
-            ntptime.settime()
 except Exception as e:
     print(e)
     error.add_error(ujson.dumps({'time': time.time(), 'error': "boot: " + str(e)}))

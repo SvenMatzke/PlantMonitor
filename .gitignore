@@ -102,4 +102,5 @@ ENV/
 .mypy_cache/
 /Source/static_index/node_modules/*
 .idea/
-/Source/python/settings.json
+/general_settings.json
+/Source/python/general_settings.json

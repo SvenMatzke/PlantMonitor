@@ -5,33 +5,25 @@ The source for now is fully functioning webserver backend and a webfrontend writ
 # ESP setup:
 For all wireing we need wires so always keep in mind you will need those in addition to your chips and power. 
 
-# Hardware (Sensor Part):
-  - adafruit breakout esp8266  (10 €)
-  - dht22 (AM2302) (5 €)
-  - Adafruit TSL2561 Digital Luminosity Lux Light Sensor Breakout (7 €)
-  - soil moisture sensor mit LM393 chip (4 €)
-  - 2 suitable resistor i have 1 *330k and 1*100k Ohm to breakdown the output voltage lower then 1 V for analog in of the esp 
-  - usb serial converter to flash software
-  - Reset-Push Button (1 €)
- 
-costs without flasher around 27 € 
- 
-# 2nd iteration will be an smaller esp
- - AI-Thinker ESP8266 ESP-08 (3.93 €)
-    https://eckstein-shop.de/AI-Thinker-ESP8266-ESP-12F-Serial-WIFI-Wireless-Remote-Control-Module
- - dht22 (AM2302) (4.95 €)
-   https://eckstein-shop.de/DHT22-Digital-Temperatur-und-Feuchtigkeits-Sensor-Modul-AM2302-mit-Jumperkabel
- - BH1750FVI GY-30 (2.95 €)
-    https://eckstein-shop.de/BH1750FVI-GY-30-Licht-Helligkeitssensor-Modul-Digital-Light-intensity-Sensor-fuer-Arduino
- - Soil Moisture Sensor (3.56 €)
-    https://eckstein-shop.de/Moisture-Sensor
- - Reset Buttons (1.95 € for 10)
-    https://eckstein-shop.de/10-Stk-6x6x6mm-DIP-4-mini-Drucktaster-Eingabetaster-AC-250V-DC-12V-50mA
-costs will be lowered to 15,59 €
+# Catch 
+Easy plant monitoring in a few steps. 
 
-Conntector
- -  cable
- - ...
+
+
+
+# Setup
+An Esp32 is the base as a controller for micropython. 
+Simply because we have plenty of IO and plenty of power for little money and we can measure the 
+Analog in even without resistors! On Esp8266 we would need a voltage between 0-1 V
+
+## Additional Sensor
+ - dht22 (AM2302) 
+ - BH1750FVI GY-30
+ - Soil Moisture Sensor
+ 
+# for Comport
+ - Reset Switch/Button
+ 
 
 # Hardware (Power supply Part)
 For the Power supply part we use simple AA Rechargeable batteries and a step up chip to get our needed 3.3 V
