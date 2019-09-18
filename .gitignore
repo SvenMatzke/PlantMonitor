@@ -104,3 +104,4 @@ ENV/
 .idea/
 /general_settings.json
 /Source/python/general_settings.json
+/Source/externalpackages/settings_store.json
