@@ -1,1 +1,0 @@
-goal is to have an easy serving server to test the front end.

@@ -1,77 +1,100 @@
-import gc
-import wlan
-import os
-import error
-
-_batch_file = "batch_file.json"
-
-loaded_settings = {}
-
 try:
-    gc.collect()
-
-    buf = bytearray(4000)
-    import deepsleep
-    import time
-    import urequests
-    import userv
-    import sensor
-    import settings
-    import ujson
+    from grown import setup, run_grown
+    import webrepl
     import machine
-    import server
 
-    # get config data
-    print("Starting main routine")
-    loaded_settings = settings.get_settings()
+    grown = setup()
+    webrepl.start()
+    print("reset %s: " % machine.reset_cause())
+    if machine.reset_cause() in [machine.HARD_RESET, machine.PWRON_RESET]:
+        import upip
 
-    # normal awake time
-    keep_alive_time = loaded_settings.get('keep_alive_time_s')
-    restful_online_time = loaded_settings.get('max_awake_time_s')
+        upip.install('grown')
+        machine.reset()
 
-    request_url = loaded_settings.get("request_url", None)
-    if wlan.sta_if.isconnected() and request_url is not None:
+    from grown.light_control import add_light_control
+    from grown.data_control import add_data_control
+    from bh import BH1750
+except ImportError:
+    import network
+    import ujson
 
-        _batch_file_ptr = open(_batch_file, "r")
-        try:
-            batches = ujson.loads(_batch_file_ptr.read())
-            for batch in batches:
-                # send plant_monitor data
-                response = urequests.post(
-                    request_url,
-                    json=batch
-                )
+    file_ptr = open("settings_store.json", "r")
+    store = ujson.loads(file_ptr.read())
+    sta_if = network.WLAN(network.STA_IF)
+    sta_if.active(True)
+    sta_if.connect(store['wlan']['ssid'], store['wlan']['password'])
+    import upip
 
-                if int(response.status_code) >= 300:
-                    error.add_error(
-                        ujson.dumps({'time': time.time(), 'status': response.status_code, 'body': response.body})
-                    )
+    upip.install('grown')
+    import machine
 
-        except Exception as e:
-            error.add_error(ujson.dumps({'time': time.time(), 'error': "Sending batches: " + str(e)}))
-        finally:
-            _batch_file_ptr.close()
-            os.remove(_batch_file)
+    machine.reset()
 
-    # Only start server if there is a network
-    if wlan.sta_if.isconnected() or wlan.ap_if.isconnected():
-        if machine.reset_cause() == machine.HARD_RESET:
-            print("Hard reset its config time")
-            restful_online_time = loaded_settings.get('awake_time_for_config', 300)
-            keep_alive_time = restful_online_time
+import requests
+import ujson as json
 
-        # power up esp while running the server
-        machine.freq(160000000)
-        print("Mem free: "+str(gc.mem_free()))
-        server.run_server(buf, restful_online_time, keep_alive_time, loaded_settings)
-except Exception as e:
-    error.add_error(ujson.dumps({'time': time.time(), 'error': "main: " + str(e)}))
-finally:
-    gc.collect()
-    machine.freq(80000000)
-    wlan.ap_if.active(False)
-    wlan.sta_if.active(False)
+import machine
+import dht
+import uasyncio as asyncio
+import time
 
-deepsleep.set_awake_time_and_put_to_deepsleep(
-    loaded_settings.get("deepsleep_s", 100)
-)
+
+# light control
+def _enable_light():
+    current_state = json.loads(requests.get("http://192.168.2.106/report").content)
+    relay_state = current_state.get('relay', True)
+    if relay_state is False:
+        requests.get('http://192.168.2.106/relay?state=1')
+
+
+def _disable_light():
+    current_state = json.loads(requests.get("http://192.168.2.106/report").content)
+    relay_state = current_state.get('relay', True)
+    if relay_state is True:
+        requests.get('http://192.168.2.106/relay?state=0')
+
+
+# sensor values
+max_adc = 2350
+
+pwr = machine.Pin(23, machine.Pin.OUT)
+pwr2 = machine.Pin(18, machine.Pin.OUT)
+i2c = machine.I2C(scl=machine.Pin(26), sda=machine.Pin(25))
+adc = machine.ADC(machine.Pin(34))
+adc.atten(machine.ADC.ATTN_11DB)
+dht_sensor = dht.DHT22(machine.Pin(19))
+
+
+def _convert_adc_to_precentage(adc_value):
+    return adc_value * 100 / max_adc
+
+
+async def get_sensor_data():
+    values = {}
+    print("Measure")
+    try:
+        pwr.on()
+        pwr2.on()
+        await asyncio.sleep(3)
+        light = BH1750(i2c)
+        dht_sensor.measure()
+        await asyncio.sleep(1)
+        values = {
+            "moisture": _convert_adc_to_precentage(adc.read()),
+            "lumen": light.luminance(0x20),
+            "temperature": dht_sensor.temperature(),
+            "humidity": dht_sensor.humidity()
+        }
+    except Exception as e:
+        print("Failure in measure: %s " % str(e))
+    finally:
+        pwr.off()
+        pwr2.off()
+    return values
+
+
+add_light_control(grown, _enable_light, _disable_light, lambda x: False)
+add_data_control(grown, get_sensor_data)
+
+run_grown()
